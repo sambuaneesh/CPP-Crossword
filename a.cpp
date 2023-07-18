@@ -12,6 +12,14 @@ ToUpper(std::string s) {
   return out;
 }
 
+int
+bucket(std::string s) {
+  assert(!s.empty());
+  int out = s[0] - 'A';
+  assert(out >= 0 && out < 26);
+  return out;
+}
+
 struct Word {
   Word(std::string str) {
     word = str;
@@ -23,10 +31,13 @@ typedef std::vector<Word> Words;
 // Things inside a class are private by default
 class Library {
 public:
+  Library() {
+    shelves.resize(26);
+  }
   bool
     Has(Word w) const {
     w.word = ToUpper(w.word);
-    for (Word word : words)
+    for (Word word : shelves[bucket(w.word)])
       if (word.word == w.word)
         return true;
     return false;
@@ -65,6 +76,7 @@ public:
       if (!line.empty()) {
         line = ToUpper(line);
         words.push_back(Word(line));
+        shelves[bucket(line)].push_back(Word(line));
       }
     }
     std::cout << "Successfully read " << words.size()
@@ -73,6 +85,7 @@ public:
 
 private:
   Words words;
+  std::vector<Words> shelves;
   std::vector<int> counts;
 };
 
@@ -128,6 +141,6 @@ main() {
   lib.ReadFromFile("wordlist.txt");
   lib.ComputeStats();
   lib.PrintStats();
-  std::cout << lib.Has(Word("sex"));
+  std::cout << lib.Has(Word("search"));
 }
 
