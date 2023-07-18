@@ -4,9 +4,25 @@
 #include <assert.h>
 #include <fstream>
 
+std::string
+ToUpper(std::string s) {
+  std::string out;
+  for (char c : s)
+    out.push_back(toupper(c));
+  return out;
+}
+
 // Things inside a class are private by default
 class Library {
 public:
+  bool
+    HasWord(std::string s) const {
+    s = ToUpper(s);
+    for (std::string t : words)
+      if (s == t)
+        return true;
+    return false;
+  }
   void
     ComputeStats() {
     assert(counts.empty());
@@ -38,8 +54,10 @@ public:
     while (!file.eof()) {
       std::string line;
       getline(file, line);
-      if (!line.empty())
+      if (!line.empty()) {
+        line = ToUpper(line);
         words.push_back(line);
+      }
     }
     std::cout << "Successfully read " << words.size()
       << " words from " << filename << std::endl;
@@ -66,8 +84,10 @@ struct Grid {
     while (!file.eof()) {
       std::string line;
       getline(file, line);
-      if (!line.empty() && line[0] != '#')
+      if (!line.empty() && line[0] != '#') {
+        line = ToUpper(line);
         lines.push_back(line);
+      }
     }
   }
   void
@@ -100,5 +120,6 @@ main() {
   lib.ReadFromFile("wordlist.txt");
   lib.ComputeStats();
   lib.PrintStats();
+  std::cout << lib.HasWord("the");
 }
 
