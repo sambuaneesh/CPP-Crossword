@@ -12,14 +12,22 @@ ToUpper(std::string s) {
   return out;
 }
 
+struct Word {
+  Word(std::string str) {
+    word = str;
+  }
+  std::string word;
+};
+typedef std::vector<Word> Words;
+
 // Things inside a class are private by default
 class Library {
 public:
   bool
-    HasWord(std::string s) const {
-    s = ToUpper(s);
-    for (std::string t : words)
-      if (s == t)
+    Has(Word w) const {
+    w.word = ToUpper(w.word);
+    for (Word word : words)
+      if (word.word == w.word)
         return true;
     return false;
   }
@@ -27,8 +35,8 @@ public:
     ComputeStats() {
     assert(counts.empty());
     counts.resize(18);
-    for (std::string str : words) {
-      int len = str.size();
+    for (Word w : words) {
+      int len = w.word.size();
       if (len)
         ++counts[len];
     }
@@ -45,7 +53,7 @@ public:
   std::string
     GetWord(int i) const {
     assert(i >= 0 && i < words.size());
-    return words[i];
+    return words[i].word;
   }
   void
     ReadFromFile(std::string filename) {
@@ -56,7 +64,7 @@ public:
       getline(file, line);
       if (!line.empty()) {
         line = ToUpper(line);
-        words.push_back(line);
+        words.push_back(Word(line));
       }
     }
     std::cout << "Successfully read " << words.size()
@@ -64,7 +72,7 @@ public:
   }
 
 private:
-  std::vector<std::string> words;
+  Words words;
   std::vector<int> counts;
 };
 
@@ -120,6 +128,6 @@ main() {
   lib.ReadFromFile("wordlist.txt");
   lib.ComputeStats();
   lib.PrintStats();
-  std::cout << lib.HasWord("the");
+  std::cout << lib.Has(Word("sex"));
 }
 
