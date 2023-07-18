@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <unordered_map>
 #include <assert.h>
 #include <fstream>
 
@@ -12,38 +13,26 @@ ToUpper(std::string s) {
   return out;
 }
 
-const int num_buckets = 501;
-
-// hash function
-int
-bucket(std::string s) {
-  assert(!s.empty());
-  int out = s[0] - 'A';
-  for (char c : s)
-    out = ((out * 217) + c) % num_buckets;
-  assert(out >= 0 && out < num_buckets);
-  return out;
-}
-
 struct Word {
+  Word() {};
   Word(std::string str) : word(str) {}
   std::string word;
 };
 typedef std::vector<Word> Words;
+typedef std::unordered_map<std::string, Word> WordMap;
 
 // Things inside a class are private by default
 class Library {
 public:
-  Library() {
-    shelves_.resize(num_buckets);
-  }
+  Library() {}
   bool
     Has(Word w) const {
-    w.word = ToUpper(w.word);
-    for (Word word : shelves_[bucket(w.word)])
-      if (word.word == w.word)
-        return true;
-    return false;
+    auto it = word_map_.find(w.word);
+    // word_map_.end() returns true if element is not found
+    if (it == word_map_.end()) return false;
+    else return true;
+    // alternative approach
+    // return word_map_.count(w.word) > 0;
   }
   void
     ComputeStats() {
@@ -79,23 +68,23 @@ public:
       if (!line.empty()) {
         line = ToUpper(line);
         words_.push_back(Word(line));
-        shelves_[bucket(line)].push_back(Word(line));
+        word_map_[line] = Word(line);
+        // shelves_[bucket(line)].push_back(Word(line));
       }
     }
     std::cout << "Successfully read " << words_.size()
       << " words from " << filename << std::endl;
   }
   void
-    DebugBuckets() {
-    for (int i = 0; i < shelves_.size();i++) {
-      std::cout << "[" << i << "]" << "\t"
-        << shelves_[i].size() << std::endl;
+    DebugBuckets() const {
+    for (int i = 0; i < word_map_.bucket_count();i++) {
+      std::cout << "[" << i << "]" << word_map_.bucket_size(i) << std::endl;
     }
   }
 
 private:
   Words words_;
-  std::vector<Words> shelves_;
+  WordMap word_map_;
   std::vector<int> counts_;
 };
 
@@ -151,6 +140,6 @@ main() {
   lib.ReadFromFile("wordlist.txt");
   lib.ComputeStats();
   lib.PrintStats();
-  // lib.DebugBuckets();
+  lib.DebugBuckets();
 }
 
