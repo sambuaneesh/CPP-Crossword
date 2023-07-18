@@ -14,13 +14,13 @@ ToUpper(std::string s) {
 
 const int num_buckets = 501;
 
+// hash function
 int
 bucket(std::string s) {
   assert(!s.empty());
   int out = s[0] - 'A';
   for (char c : s)
-    out += c;
-  out = out % num_buckets;
+    out = ((out * 217) + c) % num_buckets;
   assert(out >= 0 && out < num_buckets);
   return out;
 }
