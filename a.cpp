@@ -26,9 +26,7 @@ bucket(std::string s) {
 }
 
 struct Word {
-  Word(std::string str) {
-    word = str;
-  }
+  Word(std::string str) : word(str) {}
   std::string word;
 };
 typedef std::vector<Word> Words;
@@ -37,39 +35,39 @@ typedef std::vector<Word> Words;
 class Library {
 public:
   Library() {
-    shelves.resize(num_buckets);
+    shelves_.resize(num_buckets);
   }
   bool
     Has(Word w) const {
     w.word = ToUpper(w.word);
-    for (Word word : shelves[bucket(w.word)])
+    for (Word word : shelves_[bucket(w.word)])
       if (word.word == w.word)
         return true;
     return false;
   }
   void
     ComputeStats() {
-    assert(counts.empty());
-    counts.resize(18);
-    for (Word w : words) {
+    assert(counts_.empty());
+    counts_.resize(18);
+    for (Word w : words_) {
       int len = w.word.size();
       if (len)
-        ++counts[len];
+        ++counts_[len];
     }
   }
   void
     PrintStats() const {
     std::cout << "Stats of the Library Data are: "
       << std::endl;
-    for (int i = 1;i < counts.size();i++) {
+    for (int i = 1;i < counts_.size();i++) {
       std::cout << "[ " << i << " ]\t"
-        << counts[i] << std::endl;
+        << counts_[i] << std::endl;
     }
   }
   std::string
     GetWord(int i) const {
-    assert(i >= 0 && i < words.size());
-    return words[i].word;
+    assert(i >= 0 && i < words_.size());
+    return words_[i].word;
   }
   void
     ReadFromFile(std::string filename) {
@@ -80,25 +78,25 @@ public:
       getline(file, line);
       if (!line.empty()) {
         line = ToUpper(line);
-        words.push_back(Word(line));
-        shelves[bucket(line)].push_back(Word(line));
+        words_.push_back(Word(line));
+        shelves_[bucket(line)].push_back(Word(line));
       }
     }
-    std::cout << "Successfully read " << words.size()
+    std::cout << "Successfully read " << words_.size()
       << " words from " << filename << std::endl;
   }
   void
     DebugBuckets() {
-    for (int i = 0; i < shelves.size();i++) {
+    for (int i = 0; i < shelves_.size();i++) {
       std::cout << "[" << i << "]" << "\t"
-        << shelves[i].size() << std::endl;
+        << shelves_[i].size() << std::endl;
     }
   }
 
 private:
-  Words words;
-  std::vector<Words> shelves;
-  std::vector<int> counts;
+  Words words_;
+  std::vector<Words> shelves_;
+  std::vector<int> counts_;
 };
 
 // Things inside a struct are public by default
@@ -144,16 +142,15 @@ struct Grid {
 
 int
 main() {
-  Grid grid("Main Grid");
-  grid.Print();
-  grid.Load("grid");
-  grid.Check();
-  grid.Print();
+  // Grid grid("Main Grid");
+  // grid.Print();
+  // grid.Load("grid");
+  // grid.Check();
+  // grid.Print();
   Library lib;
   lib.ReadFromFile("wordlist.txt");
   lib.ComputeStats();
   lib.PrintStats();
-  std::cout << lib.Has(Word("search"));
-  lib.DebugBuckets();
+  // lib.DebugBuckets();
 }
 
