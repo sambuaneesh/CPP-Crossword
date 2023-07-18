@@ -12,11 +12,16 @@ ToUpper(std::string s) {
   return out;
 }
 
+const int num_buckets = 501;
+
 int
 bucket(std::string s) {
   assert(!s.empty());
   int out = s[0] - 'A';
-  assert(out >= 0 && out < 26);
+  for (char c : s)
+    out += c;
+  out = out % num_buckets;
+  assert(out >= 0 && out < num_buckets);
   return out;
 }
 
@@ -32,7 +37,7 @@ typedef std::vector<Word> Words;
 class Library {
 public:
   Library() {
-    shelves.resize(26);
+    shelves.resize(num_buckets);
   }
   bool
     Has(Word w) const {
@@ -81,6 +86,13 @@ public:
     }
     std::cout << "Successfully read " << words.size()
       << " words from " << filename << std::endl;
+  }
+  void
+    DebugBuckets() {
+    for (int i = 0; i < shelves.size();i++) {
+      std::cout << "[" << i << "]" << "\t"
+        << shelves[i].size() << std::endl;
+    }
   }
 
 private:
@@ -142,5 +154,6 @@ main() {
   lib.ComputeStats();
   lib.PrintStats();
   std::cout << lib.Has(Word("search"));
+  lib.DebugBuckets();
 }
 
