@@ -73,10 +73,10 @@ public:
     return words_[i].word;
   }
   void
-    ReadFromFile(std::string filename) {
+    Read(std::string filename) {
     std::fstream file;
     file.open(filename);
-    while (!file.eof()) {
+    while (file.is_open() && !file.eof()) {
       std::string line;
       getline(file, line);
       if (!line.empty()) {
@@ -152,7 +152,7 @@ main() {
   // grid.Check();
   // grid.Print();
   Library lib;
-  lib.ReadFromFile("wordlist.txt");
+  lib.Read("wordlist.txt");
   // lib.ComputeStats();
   // lib.PrintStats();
   // lib.DebugBuckets();
