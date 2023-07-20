@@ -25,6 +25,20 @@ typedef std::unordered_map<std::string, Word> WordMap;
 class Library {
 public:
   Library() {}
+  void
+    Find(const std::string& s) const {
+    int len = s.length();
+    for (const Word& w : words_) {
+      std::string temp = w.word;
+      if (len == temp.length()) {
+        for (int i = 0; i < len; i++) {
+          if (s[i] == '-')
+            temp[i] = '-';
+        }
+        if (temp == s) std::cout << w.word << ' ';
+      }
+    }
+  }
   bool
     Has(Word w) const {
     auto it = word_map_.find(w.word);
@@ -69,7 +83,6 @@ public:
         line = ToUpper(line);
         words_.push_back(Word(line));
         word_map_[line] = Word(line);
-        // shelves_[bucket(line)].push_back(Word(line));
       }
     }
     std::cout << "Successfully read " << words_.size()
@@ -83,6 +96,8 @@ public:
   }
 
 private:
+  // Generally its a convention to keep _
+  // For the Pvt members at the end
   Words words_;
   WordMap word_map_;
   std::vector<int> counts_;
@@ -138,8 +153,9 @@ main() {
   // grid.Print();
   Library lib;
   lib.ReadFromFile("wordlist.txt");
-  lib.ComputeStats();
-  lib.PrintStats();
-  lib.DebugBuckets();
+  // lib.ComputeStats();
+  // lib.PrintStats();
+  // lib.DebugBuckets();
+  lib.Find("D--");
 }
 
