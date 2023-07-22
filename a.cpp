@@ -17,27 +17,26 @@ struct Word {
   Word() {};
   Word(std::string str) : word(str) {}
   std::string word;
+  int len() { return word.length(); }
 };
-typedef std::vector<Word> Words;
-typedef std::unordered_map<std::string, Word> WordMap;
+typedef std::vector<Word*> Words;
+typedef std::unordered_map<std::string, Words> WordMap;
 
 // Things inside a class are private by default
 class Library {
 public:
   Library() {}
+  ~Library() { for (Word* w : words_) delete w; }
   void
     Find(const std::string& s) const {
-    int len = s.length();
-    for (const Word& w : words_) {
-      std::string temp = w.word;
-      if (len == temp.length()) {
-        for (int i = 0; i < len; i++) {
-          if (s[i] == '-')
-            temp[i] = '-';
-        }
-        if (temp == s) std::cout << w.word << ' ';
-      }
+    auto it = word_map_.find(s);
+    if (it != word_map_.end()) {
+      for (const Word* w : it->second)
+        std::cout << w->word << " ";
+      std::cout << std::endl;
     }
+    else
+      std::cout << "No Combinations" << std::endl;
   }
   bool
     Has(Word w) const {
@@ -52,8 +51,8 @@ public:
     ComputeStats() {
     assert(counts_.empty());
     counts_.resize(18);
-    for (Word w : words_) {
-      int len = w.word.size();
+    for (Word* w : words_) {
+      int len = w->word.size();
       if (len)
         ++counts_[len];
     }
@@ -70,7 +69,21 @@ public:
   std::string
     GetWord(int i) const {
     assert(i >= 0 && i < words_.size());
-    return words_[i].word;
+    return words_[i]->word;
+  }
+  void
+    PatternHash(Word* w) {
+    const int len = w->len();
+    int num_patterns = 1 << len;
+    // std::cout << num_patterns << std::endl;
+    for (int i = 0;i < num_patterns;i++) {
+      std::string temp = w->word;
+      for (int j = 0;j < len;j++) {
+        if ((i >> j) & 1) temp[j] = '-';
+      }
+      // std::cout << temp << std::endl;
+      word_map_[temp].push_back(w);
+    }
   }
   void
     Read(std::string filename) {
@@ -81,8 +94,9 @@ public:
       getline(file, line);
       if (!line.empty()) {
         line = ToUpper(line);
-        words_.push_back(Word(line));
-        word_map_[line] = Word(line);
+        Word* w = new Word(line);
+        words_.push_back(w);
+        PatternHash(w);
       }
     }
     std::cout << "Successfully read " << words_.size()
@@ -98,8 +112,8 @@ public:
 private:
   // Generally its a convention to keep _
   // For the Pvt members at the end
-  Words words_;
-  WordMap word_map_;
+  Words words_;   // Master Vector of Words
+  WordMap word_map_;    // Pattern Hash
   std::vector<int> counts_;
 };
 
@@ -157,5 +171,11 @@ main() {
   // lib.PrintStats();
   // lib.DebugBuckets();
   lib.Find("D--");
+  lib.Find("C--");
+  lib.Find("D----");
+  lib.Find("A----");
+  lib.Find("C-----T");
+  lib.Find("EN---");
+  lib.Find("PO---");
 }
 
