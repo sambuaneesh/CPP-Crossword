@@ -13,8 +13,41 @@ ToUpper(std::string s) {
   return out;
 }
 
+struct Point {
+  Point() {};
+  Point(int r, int c) : row(r), column(c) {}
+
+  int row = 0;
+  int column = 0;
+
+  friend std::ostream& operator<<(std::ostream& os, const Point& p);
+};
+
+std::ostream& operator<<(std::ostream& os, const Point& p)
+{
+  os << '(' << p.row << ',' << p.column << ')';
+  return os;
+}
+struct Span {
+  Span(Point p, int l, bool v) : point(p),
+    length(l), isVertical(v) {}
+
+  Point point;
+  int length;
+  bool isVertical;
+
+  friend std::ostream& operator<<(std::ostream& os, const Span& s);
+};
+
+std::ostream& operator<<(std::ostream& os, const Span& s)
+{
+  os << '[' << s.point << ';' << "len=" << s.length
+    << ';' << "vertical=" << s.isVertical << ']';
+  return os;
+}
+
 struct Word {
-  Word() {};
+  Word() {}
   Word(std::string str) : word(str) {}
   std::string word;
   int len() { return word.length(); }
@@ -73,7 +106,8 @@ public:
   }
   void
     PatternHash(Word* w) {
-    const int len = w->len();
+    int len = w->len();
+    if (len > 7) return;
     int num_patterns = 1 << len;
     // std::cout << num_patterns << std::endl;
     for (int i = 0;i < num_patterns;i++) {
@@ -177,5 +211,9 @@ main() {
   lib.Find("C-----T");
   lib.Find("EN---");
   lib.Find("PO---");
+  Point p(1, 2);
+  std::cout << p << std::endl;
+  Span s(p, 3, true);
+  std::cout << s << std::endl;
 }
 
