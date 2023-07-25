@@ -38,6 +38,7 @@ struct Span {
 
   friend std::ostream& operator<<(std::ostream& os, const Span& s);
 };
+typedef std::vector<Span> Spans;
 
 std::ostream& operator<<(std::ostream& os, const Span& s)
 {
@@ -153,13 +154,46 @@ private:
 
 // Things inside a struct are public by default
 struct Grid {
-  std::vector<std::string> lines;
-  std::string name;
   Grid
   (std::string n = "UNTITLED") {
     name = n;
   }
   int Rows() const { return lines.size(); }
+  int Cols() const {
+    if (lines.empty()) {
+      return 0;
+    }
+    else {
+      return lines[0].size();
+    }
+  }
+
+  // Limited Grid Support - Fix in Future
+  void FillSpans(bool vert) {
+    Point p;
+    while (in_bounds(p)) {
+      while (in_bounds(p) && is_block(p)) {
+        Next(p, vert);
+      }
+      if (!in_bounds(p)) return;
+      Point startp = p;
+      std::cout << "SPAN START: " << p << std::endl;
+      int len = 0;
+      do {
+        Next(p, vert);
+        len++;
+      } while (in_bounds(p) && !is_block(p));
+      std::cout << "END OF SPAN! len= " << len << std::endl;
+    }
+
+  }
+
+  void FillSpans() {
+    assert(spans.empty());
+    FillSpans(false); // horizontal
+    FillSpans(true);  // vertical
+  }
+
   void
     Load(std::string filename) {
     std::fstream file;
@@ -173,6 +207,46 @@ struct Grid {
       }
     }
   }
+
+  char box(const Point& p) const {
+    assert(in_bounds(p));
+    return lines[p.row][p.column];
+  }
+
+  bool is_block(const Point& p) const {
+    return ('.' == box(p));
+  }
+
+  bool is_blank(const Point& p) const {
+    return ('-' == box(p));
+  }
+
+  bool is_letter(const Point& p) const {
+    char c = box(p);
+    return c >= 'A' && c <= 'Z';
+  }
+
+  bool in_bounds(const Point& p) const {
+    return (
+      p.row >= 0 && p.column >= 0 && p.row
+      < Rows() && p.column < Cols()
+      );
+  }
+
+  bool Next(Point& p, bool isVertical) {
+    if (isVertical) {
+      if (++p.row >= Rows()) {
+        p.row = 0; p.column++;
+      }
+    }
+    else {
+      if (++p.column >= Cols()) {
+        p.column = 0; p.row++;
+      }
+    }
+    return in_bounds(p);
+  }
+
   void
     Check() const {
     for (std::string s : lines) assert(s.size() == Rows());
@@ -189,31 +263,38 @@ struct Grid {
     }
     std::cout << std::endl;
   }
+  std::string name;
+  std::vector<std::string> lines;
+  Spans spans;
 };
 
 
 int
 main() {
-  // Grid grid("Main Grid");
+  Grid grid("Main Grid");
   // grid.Print();
-  // grid.Load("grid");
-  // grid.Check();
-  // grid.Print();
+  grid.Load("grid");
+  grid.Check();
+  grid.Print();
   Library lib;
   lib.Read("wordlist.txt");
   // lib.ComputeStats();
   // lib.PrintStats();
   // lib.DebugBuckets();
-  lib.Find("D--");
-  lib.Find("C--");
-  lib.Find("D----");
-  lib.Find("A----");
-  lib.Find("C-----T");
-  lib.Find("EN---");
-  lib.Find("PO---");
-  Point p(1, 2);
-  std::cout << p << std::endl;
-  Span s(p, 3, true);
-  std::cout << s << std::endl;
+  // lib.Find("D--");
+  // lib.Find("C--");
+  // lib.Find("D----");
+  // lib.Find("A----");
+  // lib.Find("C-----T");
+  // lib.Find("EN---");
+  // lib.Find("PO---");
+  Point p;
+  // std::cout << p << std::endl;
+  // Span s(p, 3, true);
+  // std::cout << s << std::endl;
+  // do {
+  //   std::cout << p << " " << grid.is_block(p) << std::endl;
+  // } while (grid.Next(p, false));
+  // std::cout << grid.Rows() << " " << grid.Cols() << std::endl;
+  grid.FillSpans();
 }
-
