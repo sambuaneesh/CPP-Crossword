@@ -23,8 +23,7 @@ struct Point {
   friend std::ostream& operator<<(std::ostream& os, const Point& p);
 };
 
-std::ostream& operator<<(std::ostream& os, const Point& p)
-{
+std::ostream& operator<<(std::ostream& os, const Point& p) {
   os << '(' << p.row << ',' << p.column << ')';
   return os;
 }
@@ -40,8 +39,7 @@ struct Span {
 };
 typedef std::vector<Span> Spans;
 
-std::ostream& operator<<(std::ostream& os, const Span& s)
-{
+std::ostream& operator<<(std::ostream& os, const Span& s) {
   os << '[' << s.point << ';' << "len=" << s.length
     << ';' << "vertical=" << s.isVertical << ']';
   return os;
@@ -61,8 +59,7 @@ class Library {
 public:
   Library() {}
   ~Library() { for (Word* w : words_) delete w; }
-  void
-    Find(const std::string& s) const {
+  void Find(const std::string& s) const {
     auto it = word_map_.find(s);
     if (it != word_map_.end()) {
       for (const Word* w : it->second)
@@ -72,8 +69,7 @@ public:
     else
       std::cout << "No Combinations" << std::endl;
   }
-  bool
-    Has(Word w) const {
+  bool Has(Word w) const {
     auto it = word_map_.find(w.word);
     // word_map_.end() returns true if element is not found
     if (it == word_map_.end()) return false;
@@ -81,8 +77,7 @@ public:
     // alternative approach
     // return word_map_.count(w.word) > 0;
   }
-  void
-    ComputeStats() {
+  void ComputeStats() {
     assert(counts_.empty());
     counts_.resize(18);
     for (Word* w : words_) {
@@ -91,8 +86,7 @@ public:
         ++counts_[len];
     }
   }
-  void
-    PrintStats() const {
+  void PrintStats() const {
     std::cout << "Stats of the Library Data are: "
       << std::endl;
     for (int i = 1;i < counts_.size();i++) {
@@ -105,8 +99,7 @@ public:
     assert(i >= 0 && i < words_.size());
     return words_[i]->word;
   }
-  void
-    PatternHash(Word* w) {
+  void PatternHash(Word* w) {
     int len = w->len();
     if (len > 7) return;
     int num_patterns = 1 << len;
@@ -120,8 +113,7 @@ public:
       word_map_[temp].push_back(w);
     }
   }
-  void
-    Read(std::string filename) {
+  void Read(std::string filename) {
     std::fstream file;
     file.open(filename);
     while (file.is_open() && !file.eof()) {
@@ -137,8 +129,7 @@ public:
     std::cout << "Successfully read " << words_.size()
       << " words from " << filename << std::endl;
   }
-  void
-    DebugBuckets() const {
+  void DebugBuckets() const {
     for (int i = 0; i < word_map_.bucket_count();i++) {
       std::cout << "[" << i << "]" << word_map_.bucket_size(i) << std::endl;
     }
@@ -177,13 +168,14 @@ struct Grid {
       }
       if (!in_bounds(p)) return;
       Point startp = p;
-      std::cout << "SPAN START: " << p << std::endl;
+      // std::cout << "SPAN START: " << p << std::endl;
       int len = 0;
       do {
         Next(p, vert);
         len++;
       } while (in_bounds(p) && !is_block(p));
-      std::cout << "END OF SPAN! len= " << len << std::endl;
+      // std::cout << "END OF SPAN! len= " << len << std::endl;
+      spans.push_back(Span(startp, len, vert));
     }
 
   }
@@ -194,8 +186,7 @@ struct Grid {
     FillSpans(true);  // vertical
   }
 
-  void
-    Load(std::string filename) {
+  void Load(std::string filename) {
     std::fstream file;
     file.open(filename);
     while (!file.eof()) {
@@ -247,12 +238,10 @@ struct Grid {
     return in_bounds(p);
   }
 
-  void
-    Check() const {
+  void Check() const {
     for (std::string s : lines) assert(s.size() == Rows());
   }
-  void
-    Print() const {
+  void Print() const {
     std::cout << "# " << name << std::endl;
     std::cout << "Number of Rows: " << Rows() << std::endl;
     for (std::string str : lines) {
@@ -263,14 +252,21 @@ struct Grid {
     }
     std::cout << std::endl;
   }
+
+  void PrintSpans() const {
+    std::cout << "Spans:" << std::endl;
+    for (const Span& s : spans) {
+      std::cout << " " << s << std::endl;
+    }
+  }
+
   std::string name;
   std::vector<std::string> lines;
   Spans spans;
 };
 
 
-int
-main() {
+int main() {
   Grid grid("Main Grid");
   // grid.Print();
   grid.Load("grid");
@@ -297,4 +293,5 @@ main() {
   // } while (grid.Next(p, false));
   // std::cout << grid.Rows() << " " << grid.Cols() << std::endl;
   grid.FillSpans();
+  grid.PrintSpans();
 }
